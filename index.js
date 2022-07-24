@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken'
 import auth from './auth.js'
 import dotenv from "dotenv"
+import{createLeads,createContacts,createServiceRequest,updateLeads,updateContact,updateServiceRequest,createUser,Login} from './Function.js'
 
 dotenv.config();
 const app = express();
@@ -13,12 +14,11 @@ const expressJson = express.json();
 const bodyParser  = express.urlencoded({extended: true});
 app.use([expressJson, bodyParser])
 app.use(cors());
-const PORT = 4000;
-const MONGO_URL ='mongodb://localhost'
-console.log(process.env)
-console.log(process.env.secret_key);
+
+
+
 async function createConnection(){
-    const client = new MongoClient(MONGO_URL);
+    const client = new MongoClient(process.env.MONGO_URL);
     await client.connect();
     console.log("success");
     return client;
@@ -32,44 +32,64 @@ async function  generateHashedPassword(password) {
     return hashed;
 
 }
-const client = await createConnection();
+export const client = await createConnection();
 app.get("/",  function(request,response){
      response.send("Hi");
 })
 
 app.post("/register",async function(request,response){
- 
+
     const password1 = await request.body.password.toString();
     const hashedPassword = await generateHashedPassword(password1)
-    console.log(password1);
-    console.log(hashedPassword);
-    const  result = await client.db("CRM").collection("users").insertOne({
-        firstname:request.body.firstname,
-        lastname:request.body.lastname,
-        username:request.body.username,
-        password:hashedPassword,
-        role:request.body.role
-        
-    });
+    
+    const  result = await createUser(request, hashedPassword);
     console.log(result);
     response.send(result);
 })
 
 app.post("/createContacts", async function(request,response){
-    const result = await client.db("CRM").collection("contacts").insertOne({
-    name:request.body.name,
-    email:request.body.email,
-    phone:request.body.phone,
-    city:request.body.city,
-    street:request.body.street,
-    country:response.body.country
-    })
+    const result = await createContacts(request, response)
     response.send(result);
 })
 
+app.post("/createLeads/auth", async function(request,response){
+    const result = await createLeads(request, response)
+    response.send(result);
+})
+
+app.post("/createServicerequest/auth", async function(request,response){
+    const service = await createServiceRequest(request)
+    response.send(service);
+})
+
+app.get("/updateContact/:id",async function(request,response){
+    const {id} = request.params;
+    const data =request.body;
+    const  result = await updateContact(id, data);
+    response.send(result);
+})
+
+app.get("/updateLeads/:id",async function(request,response){
+    const {id} = request.params;
+    const data =request.body;
+    const  result = await updateLeads(id, data);
+    response.send(result);
+})
+
+
+app.get("/updateServicerequest/:id",async function(request,response){
+    const {id} = request.params;
+    const data =request.body;
+    const  result = await updateServiceRequest(id, data);
+    response.send(result);
+})
+
+
+
+
 app.post("/login/auth", async function(request,response){
     const{username,password}=request.body
-    const userDB = await client.db("CRM").collection("users").findOne({username:username})
+    const userDB = await Login(username)
     if(!userDB){
         response.send({"error":"Invalid credentials"})
     }
@@ -92,4 +112,6 @@ app.post("/login/auth", async function(request,response){
 })
 
 
-app.listen(PORT,()=>console.log(`App is running at ${PORT}`));
+app.listen(process.env.PORT,()=>console.log(`App is running at ${process.env.PORT}`));
+
+
