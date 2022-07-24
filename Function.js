@@ -5,7 +5,7 @@ import {ObjectId} from 'mongodb';
 
 
 export async function Login(username) {
-    return await client.db("CRM").collection("users").findOne({ username: username });
+    return await client.db("CRM").collection("users").findOne({ username: email });
 }
 
 export function updateServiceRequest(id, data) {
@@ -75,7 +75,7 @@ export async function createUser(request, hashedPassword) {
     return await client.db("CRM").collection("users").insertOne({
         firstname: request.body.firstname,
         lastname: request.body.lastname,
-        username: request.body.username,
+        username: request.body.email,
         password: hashedPassword,
         role: request.body.role
     });

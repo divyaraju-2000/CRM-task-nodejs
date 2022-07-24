@@ -105,8 +105,8 @@ app.get("/updateServicerequest/:id",async function(request,response){
 
 
 app.post("/login/auth", async function(request,response){
-    const{username,password}=request.body
-    const userDB = await Login(username)
+    const{email,password}=request.body
+    const userDB = await Login(email)
     if(!userDB){
         response.send({"error":"Invalid credentials"})
     }
@@ -129,34 +129,10 @@ app.post("/login/auth", async function(request,response){
 })
 
 app.post("/reset",async function(request,response){
-    const username = request.body.username;
+    const username = request.body.email;
     const userDB = await client.db("CRM").collection("users").find({username:username});
     if(userDB){
-       
-
-var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'youremail@gmail.com',
-    pass: 'yourpassword'
-  }
-});
-
-var mailOptions = {
-  from: 'youremail@gmail.com',
-  to: 'myfriend@yahoo.com',
-  subject: 'Sending Email using Node.js',
-  text: 'That was easy!'
-};
-
-transporter.sendMail(mailOptions, function(error, info){
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Email sent: ' + info.response);
-  }
-});
-    }
+       }
 })
 
 app.listen(process.env.PORT,()=>console.log(`App is running at ${process.env.PORT}`));
