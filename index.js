@@ -7,6 +7,8 @@ import auth from './auth.js'
 import dotenv from "dotenv"
 import{createLeads,createContacts,createServiceRequest,updateLeads,updateContact,updateServiceRequest,createUser,Login} from './Function.js'
 
+
+var nodemailer = require('nodemailer');
 dotenv.config();
 const app = express();
 // const secret_key = "my_secret";
@@ -56,6 +58,18 @@ app.post("/createLeads/auth", async function(request,response){
     const result = await createLeads(request, response)
     response.send(result);
 })
+app.get("/contacts", async function(request,response){
+    const data = await client.db("CRM").collection("contacts").find({}).toArray();
+    response.send(data);
+})
+app.get("/leads", async function(request,response){
+    const data = await client.db("CRM").collection("leads").find({}).toArray();
+    response.send(data);
+})
+app.get("/servicerequest", async function(request,response){
+    const data = await client.db("CRM").collection("serviceRequest").find({}).toArray();
+    response.send(data);
+})
 
 app.post("/createServicerequest/auth", async function(request,response){
     const service = await createServiceRequest(request)
@@ -75,6 +89,9 @@ app.get("/updateLeads/:id",async function(request,response){
     const  result = await updateLeads(id, data);
     response.send(result);
 })
+
+
+
 
 
 app.get("/updateServicerequest/:id",async function(request,response){
@@ -111,6 +128,36 @@ app.post("/login/auth", async function(request,response){
     }
 })
 
+app.post("/reset",async function(request,response){
+    const username = request.body.username;
+    const userDB = await client.db("CRM").collection("users").find({username:username});
+    if(userDB){
+       
+
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'youremail@gmail.com',
+    pass: 'yourpassword'
+  }
+});
+
+var mailOptions = {
+  from: 'youremail@gmail.com',
+  to: 'myfriend@yahoo.com',
+  subject: 'Sending Email using Node.js',
+  text: 'That was easy!'
+};
+
+transporter.sendMail(mailOptions, function(error, info){
+  if (error) {
+    console.log(error);
+  } else {
+    console.log('Email sent: ' + info.response);
+  }
+});
+    }
+})
 
 app.listen(process.env.PORT,()=>console.log(`App is running at ${process.env.PORT}`));
 
