@@ -8,9 +8,10 @@ import dotenv from "dotenv"
 import{createLeads,createContacts,createServiceRequest,updateLeads,updateContact,updateServiceRequest,createUser,Login} from './Function.js'
 
 
-var nodemailer = require('nodemailer');
+
 dotenv.config();
 const app = express();
+const port = process.env.PORT;
 // const secret_key = "my_secret";
 const expressJson = express.json();
 const bodyParser  = express.urlencoded({extended: true});
@@ -36,7 +37,12 @@ async function  generateHashedPassword(password) {
 }
 export const client = await createConnection();
 app.get("/",  function(request,response){
+    try{
      response.send("Hi");
+     }
+     catch(err){
+        response.send(err);
+     }
 })
 
 app.post("/register",async function(request,response){
@@ -135,6 +141,7 @@ app.post("/reset",async function(request,response){
        }
 })
 
-app.listen(process.env.PORT,()=>console.log(`App is running at ${process.env.PORT}`));
+
+app.listen(port,()=>console.log(`App is running at ${process.env.PORT}`));
 
 
